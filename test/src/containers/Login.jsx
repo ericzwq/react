@@ -7,7 +7,8 @@ class Login extends React.Component {
   click = () => {
     this.props.saveLogin({username: 'sdf'})
   }
-  componentWillUpdate(nextProps, nextState, nextContext) {
+
+  UNSAFE_componentWillUpdate(nextProps, nextState, nextContext) {
     console.error('login will update')
   }
 

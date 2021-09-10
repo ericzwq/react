@@ -7,6 +7,9 @@ class App extends React.Component {
   componentDidMount() {
     this.props.saveLogin({username: 'lisi'})
   }
+  UNSAFE_componentWillUpdate(nextProps, nextState, nextContext) {
+    console.error('app update')
+  }
 
   render() {
     console.log('app render------', this)

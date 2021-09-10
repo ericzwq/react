@@ -4,41 +4,43 @@ let store, subscribeList = [], mainState = {}, reducerMap = {}, reducerKeys = []
 
 function update() {
   updateList.forEach(f => f())
+  // for (let i = updateList.length - 1; i >= 0; i--) {
+  //   updateList[i]()
+  // }
 }
 
 export const connect = function (mapStateToProps, mapDispatchToProps) { // connect({}, {})(Component)
-  let state = {}, dispatch = {}, changed, updateState = () => {
-    let newState = mapStateToProps(mainState)
-    changed = state !== newState
-    if (changed) state = newState
-    for (let k in mapDispatchToProps) {
-      dispatch[k] = data => store.dispatch(mapDispatchToProps[k](data))
+  let state = {}, dispatch = {}, changed,
+    updateState = () => {
+      let newState = mapStateToProps(mainState)
+      changed = !isStrictEqual(state, newState)
+      if (changed) state = newState
     }
-  }
   return UIComponent => (class Container extends React.Component {
     state = {
       key: 0
     }
 
-    componentWillMount() {
+    UNSAFE_componentWillMount() {
       updateState()
+      for (let k in mapDispatchToProps) {
+        dispatch[k] = data => store.dispatch(mapDispatchToProps[k](data))
+      }
     }
 
     updateKey = () => {
-      this.setState({key: this.state.key + 1})
+      updateState()
+      console.log(changed, this, UIComponent.name)
+      if (changed) this.setState({key: this.state.key + 1})
+    }
+    shouldComponentUpdate(nextProps, nextState, nextContext) {
+      // console.log(arguments)
+      // return true
+      return changed
     }
 
     componentDidMount() {
       updateList.push(this.updateKey.bind(this))
-    }
-
-    shouldComponentUpdate(nextProps, nextState, nextContext) {
-      console.log(arguments)
-      return changed
-    }
-
-    componentWillUpdate() {
-      updateState()
     }
 
     render() {
@@ -53,11 +55,10 @@ export const createStore = function (reducer) { // function (state = initState, 
   console.log({mainState})
   return {
     dispatch(action) { // {type: SAVE_LOGIN, data}
-      // console.log({action, mainState, reducerKeys, reducerMap})
       let res = reducerKeys.find(k => {
-        let preState = mainState[k]
-        let newState = reducerMap[k](preState, action)
-        let changed = preState !== newState
+        let preState = mainState[k],
+          newState = reducerMap[k](preState, action),
+          changed = !isStrictEqual(preState, newState)
         if (changed) mainState[k] = newState
         return changed
       })
@@ -92,4 +93,27 @@ export class Provider extends React.Component {
     store = _store
     return <div>{App}</div>
   }
+}
+
+function isStrictEqual(obj1, obj2) {
+  let type1 = type(obj1), type2 = type(obj2)
+  if (type1 !== type2) return false
+  if (['Object', 'Array'].includes(type1)) {
+    if (Object.keys(obj1).length !== Object.keys(obj2).length) return false
+    for (let k in obj1) {
+      if (!obj2.hasOwnProperty(k)) return false
+      if (['Object', 'Array'].includes(type(obj1[k]))) {
+        return isStrictEqual(obj1[k], obj2[k])
+      } else {
+        return obj1[k] === obj2[k]
+      }
+    }
+    return true
+  } else {
+    return obj1 === obj2
+  }
+}
+
+function type(v) {
+  return Object.prototype.toString.call(v).slice(8, -1)
 }
