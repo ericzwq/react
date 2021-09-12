@@ -3,6 +3,7 @@
 # dependencies
 /test/node_modules
 /test2/node_modules
+/redux&router/node_modules
 /.pnp
 .pnp.js
 

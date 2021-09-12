@@ -13,8 +13,10 @@ export const connect = function (mapStateToProps, mapDispatchToProps) { // conne
   let state = {}, dispatch = {}, changed,
     updateState = () => {
       let newState = mapStateToProps(mainState)
-      changed = !isStrictEqual(state, newState)
+      changed = !isShallowEqual(state, newState)
+      console.log({state, newState}, changed)
       if (changed) state = newState
+      return changed
     }
   return UIComponent => (class Container extends React.Component {
     state = {
@@ -28,23 +30,31 @@ export const connect = function (mapStateToProps, mapDispatchToProps) { // conne
       }
     }
 
+    UNSAFE_componentWillUpdate(nextProps, nextState, nextContext) {
+      console.error('connect will update', UIComponent.name, arguments)
+    }
+
     updateKey = () => {
       updateState()
       console.log(changed, this, UIComponent.name)
-      if (changed) this.setState({key: this.state.key + 1})
+      console.dir(UIComponent)
+      if (changed) {
+        this.setState({key: this.state.key + 1})
+      }
     }
+
     shouldComponentUpdate(nextProps, nextState, nextContext) {
       // console.log(arguments)
-      // return true
-      return changed
+      return true
+      // return changed
     }
 
     componentDidMount() {
-      updateList.push(this.updateKey.bind(this))
+      updateList.push(this.updateKey)
     }
 
     render() {
-      return <UIComponent {...state} {...dispatch}/>
+      return <UIComponent {...state} {...dispatch} {...this.props}/>
     }
   })
 }
@@ -58,7 +68,7 @@ export const createStore = function (reducer) { // function (state = initState, 
       let res = reducerKeys.find(k => {
         let preState = mainState[k],
           newState = reducerMap[k](preState, action),
-          changed = !isStrictEqual(preState, newState)
+          changed = !isShallowEqual(preState, newState)
         if (changed) mainState[k] = newState
         return changed
       })
@@ -95,7 +105,7 @@ export class Provider extends React.Component {
   }
 }
 
-function isStrictEqual(obj1, obj2) {
+function isShallowEqual(obj1, obj2) {
   let type1 = type(obj1), type2 = type(obj2)
   if (type1 !== type2) return false
   if (['Object', 'Array'].includes(type1)) {
@@ -103,7 +113,7 @@ function isStrictEqual(obj1, obj2) {
     for (let k in obj1) {
       if (!obj2.hasOwnProperty(k)) return false
       if (['Object', 'Array'].includes(type(obj1[k]))) {
-        return isStrictEqual(obj1[k], obj2[k])
+        return isShallowEqual(obj1[k], obj2[k])
       } else {
         return obj1[k] === obj2[k]
       }

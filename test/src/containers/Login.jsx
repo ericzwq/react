@@ -5,7 +5,7 @@ import {createLoginAction} from "../action_creators";
 
 class Login extends React.Component {
   click = () => {
-    this.props.saveLogin({username: 'sdf'})
+    this.props.saveLogin({token: 'sdf'})
   }
 
   UNSAFE_componentWillUpdate(nextProps, nextState, nextContext) {
@@ -22,4 +22,4 @@ class Login extends React.Component {
   }
 }
 
-export default connect(state => ({a: 1}), {saveLogin: createLoginAction})(Login)
+export default connect(state => ({userInfo: state.userInfo}), {saveLogin: createLoginAction})(Login)
