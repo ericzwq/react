@@ -15,7 +15,7 @@ class Login extends React.Component {
   render() {
     console.log('Login render---------', this)
     return (
-      <div>
+      <div className="login">
         <button onClick={this.click}>登录</button>
       </div>
     )

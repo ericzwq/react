@@ -1,0 +1,32 @@
+.layoutBox {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+
+  header {
+    height: 60px;
+    flex-shrink: 0;
+    text-align: center;
+  }
+
+  main {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex: 1;
+
+    .left {
+      width: 200px;
+    }
+
+    .right {
+      width: 200px;
+    }
+  }
+
+  footer {
+    height: 60px;
+    flex-shrink: 0;
+    text-align: center;
+  }
+}

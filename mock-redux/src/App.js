@@ -17,7 +17,7 @@ class App extends React.Component {
   render() {
     console.log('app render------', this)
     return (
-      <div>
+      <div className="app">
         app
         <button onClick={() => this.props.saveLogin({username: 'lisi'})}>按钮</button>
         {/*<h3>app--username:{this.props.userInfo.username}</h3>*/}
